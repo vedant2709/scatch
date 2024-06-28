@@ -1,7 +1,11 @@
 const express = require("express");
 const router = express.Router();
+const { registerUser,loginUser,logout } = require("../controllers/authController");
 const { body, validationResult } = require("express-validator");
 const userModel = require("../models/user-model");
+const bcrypt = require("bcrypt");
+const cookie = require("cookie-parser");
+const { generateToken } = require("../utils/generateToken");
 
 router.get("/", function (req, res) {
   res.send("hey it's working from users route");
@@ -26,24 +30,11 @@ router.post(
       .isLength({ min: 1 })
       .withMessage("Full name cannot be empty"),
   ],
-  async function (req, res) {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    try {
-      let { email, password, fullname } = req.body;
-      let user = await userModel.create({
-        email,
-        password,
-        fullname,
-      });
-      res.send(user);
-    } catch (error) {
-      res.send(error.message);
-    }
-  }
+  registerUser
 );
+
+router.post("/login",loginUser)
+
+router.get("/logout",logout)
 
 module.exports = router;
